@@ -7,3 +7,8 @@ static
 README.html
 OVERVIEW.html
 stripes.config.js
+
+# Eclipse IDE
+/.directory
+/.project
+/.settings

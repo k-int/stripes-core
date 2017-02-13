@@ -23,7 +23,7 @@ class LoginCtrl extends Component {
     this.store = context.store;
     this.router = context.router;
     this.requestLogin = this.requestLogin.bind(this);
-    this.sys = require('stripes-loader!'); // eslint-disable-line
+    this.sys = require('@folio/stripes-loader!'); // eslint-disable-line
     this.okapiUrl = this.sys.okapi.url;
     this.tenant = this.sys.okapi.tenant;
     this.store.dispatch(clearAuthFailure());
@@ -38,7 +38,7 @@ class LoginCtrl extends Component {
           this.store.dispatch(clearCurrentUser());
         } else {
           response.json().then((json) => {
-            this.store.dispatch(setCurrentUser(json.users[0].personal.full_name));
+            this.store.dispatch(setCurrentUser(json.users[0].personal));
           });
         }
       });
@@ -47,7 +47,7 @@ class LoginCtrl extends Component {
   requestLogin(data) {
     fetch(`${this.okapiUrl}/authn/login`, {
       method: 'POST',
-      headers: Object.assign({}, { 'X-Okapi-Tenant': this.tenant }),
+      headers: Object.assign({}, { 'X-Okapi-Tenant': this.tenant, 'Content-Type': 'application/json'}),
       body: JSON.stringify(data),
     }).then((response) => {
       if (response.status >= 400) {

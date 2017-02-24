@@ -1,68 +1,53 @@
 # Stripes: quick start
 
-To run Stripes, you'll need to have [Node.js](https://nodejs.org/) 6.x installed.
-```
-node --version
-v6.8.0
-```
+## Pre-requisites
 
-Then install the Stripes modules and run as follows:
+To run Stripes, you'll need to have [Node.js](https://nodejs.org/) 6.x installed (check with `node --version`).
 
+You'll also need a package manager. We strongly recommend using [yarn](https://yarnpkg.com/). Once Yarn is installed, inform it that packages in the `@folio` scope are found on the FOLIO NPM repository:
 ```
-cd stripes-core
-npm config set @folio:registry https://repository.folio.org/repository/npm-folio/
-npm install
-npm config set @folio-sample-modules:registry https://repository.folio.org/repository/npm-folio/
-npm install @folio-sample-modules/trivial
-npm start
+yarn config set @folio:registry https://repository.folio.org/repository/npm-folio/
 ```
 
-## Some details
+## Platform
 
-Here is what the steps above do.
+Next you'll need a Stripes "platform". It consists simply of an NPM [`package.json`](https://docs.npmjs.com/files/package.json) that specifies the version of `@folio/stripes-core` and of any Stripes modules you wish to make available to generate client bundles. As a starting point, check out a [sample platform](https://github.com/folio-org/stripes-sample-platform).
 
-Add the FOLIO NPM registry to your local NPM configuration:
+From that platform directory, install everything with:
 ```
-npm config set @folio:registry https://repository.folio.org/repository/npm-folio/
-```
-Retrieve the necessary dependencies:
-```
-npm install
+yarn install
 ```
 
-At this point you have what you need to run the system. Edit `stripes.config.js` to indicate which modules you want to include and the URL to the back end. Run `npm start` to bring up a development server at http://localhost:3000/ or `npm run build` to output a set of files which can then be deployed to a web server.
-
-## Demos
-
-We have some sample modules to play with in the `@npm-sample-modules` scope on our registry. Run this to let it know where to look:
+At this point, you can choose some modules to enable in `stripes.config.js` and run the development server with:
 ```
-npm config set @folio-sample-modules:registry https://repository.folio.org/repository/npm-folio/
+yarn start
 ```
 
-### The `trivial` module
+Voilà! A development server should be running at http://localhost:3000
 
-The default configuration references a module, `trivial`, which demonstrates a simple use of `stripes-connect` to store data locally. You can install it via npm:
+The default "Trivial" example will work, as it is independent of Okapi.
+However the "Users" example requires Okapi and the back-end services of various modules and sample data.
+The simplest way to achieve that is using one of the provided
+[virtual machines](https://github.com/folio-org/folio-ansible/blob/master/README.md) (e.g. folio-backend).
+Other ways are also [explained](https://github.com/folio-org/ui-okapi-console/blob/master/doc/running-a-complete-system.md).
+
+## Using local code
+
+Module developers and those wanting to use a local checkout of core Stripes components can use the convenient [`yarn link`](https://yarnpkg.com/en/docs/cli/link) command to set their platform to use the local copy. Simply run `yarn link` in your `somemodule` directory and then run `yarn link somemodule` in the platform's directory and repeat for each local dependency you wish to create symlinks for.
+
+For example, to link the Users module, change to the directory you checked out of git (ui-users) and run:
 ```
-npm install @folio-sample-modules/trivial
+yarn link
 ```
 
-### The `trivial-okapi` module
-
-Another demo, `trivial-okapi`, shows the most basic communication with the [Okapi](https://github.com/folio-org/okapi) API gateway and will require a connection to it in order to run. It lists tenants and allows their deletion. This simple exercise only relies on Okapi rather than a collection of services so it's relatively easy to set up locally without needing Docker.
-
-Install the demo module:
+And then change to your platform directory and run:
 ```
-npm install @folio-sample-modules/trivial-okapi
+yarn link @folio/users
+yarn install
+yarn start
 ```
-After following build instructions in the [Okapi repository](https://github.com/folio-org/okapi) to get the service running, you can activate the `trivial-okapi` module by editing `stripes.config.js` before starting the dev server or building a bundle. If you have yet to create this file, copy `stripes.config.js.example` as a base.
 
-## Including a module under development
+**Note 1.** The `stripes-loader` module does not currently support being included via link.
 
-Both `stripes-loader` and `stripes-core` need to be able to resolve a `require()` of the string you use to reference your module when including it in `stripes.config.js` which governs which modules webpack bundles. One convenient approach is to place a symbolic link to it in `node_modules/@folio` or `node_modules/@folio-sample-modules` as these are already included in Webpack's search path.
+**Note 2.** As of 20 February 2017, yarn cannot find `yarn link`ed modules unless they _also_ have been published in the repository. This is [a recognised bug, issue 2611](https://github.com/yarnpkg/yarn/issues/2611) and should soon be fixed.
 
-For example, to include `some-module` from `/devstuff/some-module`: 
-
-```
-cd stripes-core/node_modules/@folio-sample-modules
-ln -s /devstuff/some-module .
-```
